@@ -159,6 +159,8 @@ static kalmanCoreParams_t coreParams;
 
 // Data used to enable the task and stabilizer loop to run with minimal locking
 static state_t taskEstimatorState; // The estimator state produced by the task, copied to the stabilizer when needed.
+// Declaring a non-static pointer which can be used by the app to access the state
+state_t *taskEstimatorState_p = &taskEstimatorState;
 
 // Statistics
 #define ONE_SECOND 1000

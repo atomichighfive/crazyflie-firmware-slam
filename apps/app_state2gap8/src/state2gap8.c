@@ -38,13 +38,19 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "stabilizer_types.h"
+
 #define DEBUG_MODULE "APP"
 #include "debug.h"
 
 // Callback that is called when a CPX packet arrives
 static void cpxPacketCallback(const CPXPacket_t* cpxRx);
 
-static CPXPacket_t txPacket;
+// CPX packet pointer
+static CPXPacket_t txStatePacket;
+
+// State to be sent to the aideck gap8. This is the global pointer in estimator_kalman.c
+extern state_t *taskEstimatorState_p;
 
 void appMain() {
   DEBUG_PRINT("Hello! I am the state2gap8 app\n");
@@ -53,20 +59,30 @@ void appMain() {
   // Packets sent to destination=CPX_T_STM32 and function=CPX_F_APP will arrive here
   cpxRegisterAppMessageHandler(cpxPacketCallback);
 
-  uint8_t counter = 0;
+  //uint8_t counter = 0;
   while(1) {
     vTaskDelay(M2T(2000));
 
-    cpxInitRoute(CPX_T_STM32, CPX_T_GAP8, CPX_F_APP, &txPacket.route);
-    txPacket.data[0] = counter;
-    txPacket.dataLength = 1;
+    //cpxInitRoute(CPX_T_STM32, CPX_T_GAP8, CPX_F_STATE, &txPacket.route);
+    //txPacket.data[0] = counter;
+    //txPacket.dataLength = 1;
 
-    cpxSendPacketBlocking(&txPacket);
-    DEBUG_PRINT("Sent packet to GAP8 (%u)\n", counter);
-    counter++;
+    //cpxSendPacketBlocking(&txPacket);
+    //DEBUG_PRINT("Sent packet to GAP8 (%u)\n", counter);
+    //counter++;
   }
 }
 
 static void cpxPacketCallback(const CPXPacket_t* cpxRx) {
-  DEBUG_PRINT("Got packet from GAP8 (%u)\n", cpxRx->data[0]);
+    /** 
+   * Send the state to the aideck gap8 for the gap8 to embed in the image
+   */
+  uint8_t request_id = cpxRx->data[0];
+  //DEBUG_PRINT("Got request from GAP8 (request_id: %u)\n", request_id);
+
+  cpxInitRoute(CPX_T_STM32, CPX_T_GAP8, CPX_F_APP, &txStatePacket.route);
+  txStatePacket.data[0] = request_id;
+  memcpy(txStatePacket.data+1, taskEstimatorState_p, sizeof(state_t));
+  txStatePacket.dataLength = 1+sizeof(state_t);
+  cpxSendPacketBlocking(&txStatePacket);
 }
