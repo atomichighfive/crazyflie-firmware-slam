@@ -77,12 +77,91 @@ static void cpxPacketCallback(const CPXPacket_t* cpxRx) {
     /** 
    * Send the state to the aideck gap8 for the gap8 to embed in the image
    */
-  uint8_t request_id = cpxRx->data[0];
-  //DEBUG_PRINT("Got request from GAP8 (request_id: %u)\n", request_id);
-
   cpxInitRoute(CPX_T_STM32, CPX_T_GAP8, CPX_F_APP, &txStatePacket.route);
-  txStatePacket.data[0] = request_id;
-  memcpy(txStatePacket.data+1, taskEstimatorState_p, sizeof(state_t));
-  txStatePacket.dataLength = 1+sizeof(state_t);
+  // Offset used to copy values to the data array
+  uint8_t offset = 0;
+
+  // request_id
+  memcpy(txStatePacket.data+offset, cpxRx->data, sizeof(uint8_t));
+  offset += sizeof(uint8_t);
+
+  // attitude.roll
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitude.roll, sizeof(float));
+  offset += sizeof(float);
+
+  // attitude.pitch
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitude.pitch, sizeof(float));
+  offset += sizeof(float);
+
+  // attitude.yaw
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitude.yaw, sizeof(float));
+  offset += sizeof(float);
+
+  // attitudeQuaternion.x
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitudeQuaternion.x, sizeof(float));
+  offset += sizeof(float);
+
+  // attitudeQuaternion.y
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitudeQuaternion.y, sizeof(float));
+  offset += sizeof(float);
+
+  // attitudeQuaternion.z
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitudeQuaternion.z, sizeof(float));
+  offset += sizeof(float);
+
+  // attitudeQuaternion.w
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->attitudeQuaternion.w, sizeof(float));
+  offset += sizeof(float);
+
+  // position.timestamp
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->position.timestamp, sizeof(uint32_t));
+  offset += sizeof(uint32_t);
+
+  // position.x
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->position.x, sizeof(float));
+  offset += sizeof(float);
+
+  // position.y
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->position.y, sizeof(float));
+  offset += sizeof(float);
+
+  // position.z
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->position.z, sizeof(float));
+  offset += sizeof(float);
+
+  // velocity.timestamp
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->velocity.timestamp, sizeof(uint32_t));
+  offset += sizeof(uint32_t);
+
+  // velocity.x
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->velocity.x, sizeof(float));
+  offset += sizeof(float);
+
+  // velocity.y
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->velocity.y, sizeof(float));
+  offset += sizeof(float);
+
+  // velocity.z
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->velocity.z, sizeof(float));
+  offset += sizeof(float);
+
+  // acc.timestamp
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->acc.timestamp, sizeof(uint32_t));
+  offset += sizeof(uint32_t);
+
+  // acc.x
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->acc.x, sizeof(float));
+  offset += sizeof(float);
+
+  // acc.y
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->acc.y, sizeof(float));
+  offset += sizeof(float);
+
+  // acc.z
+  memcpy(txStatePacket.data+offset, &taskEstimatorState_p->acc.z, sizeof(float));
+  offset += sizeof(float);
+
+  // Send the packet
+  txStatePacket.dataLength = offset;
   cpxSendPacketBlocking(&txStatePacket);
 }
