@@ -66,6 +66,7 @@ INCLUDES += -I$(KBUILD_OUTPUT)/include/generated
 # buildsystem which sources to build
 objs-y += src
 objs-y += vendor
+objs-y += apps/app_state2gap8
 
 objs-y += app_api
 objs-y += $(OOT)

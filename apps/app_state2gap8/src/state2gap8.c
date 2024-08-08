@@ -55,6 +55,8 @@ extern state_t *taskEstimatorState_p;
 void appMain() {
   DEBUG_PRINT("Hello! I am the state2gap8 app\n");
 
+  // TODO: Integrate position between requests to provide the delta position together with the state estimates. Can use a task for this and reset the integration each time the state is sent. Get the dt in the task and integrate acceleration.
+
   // Register a callback for CPX packets.
   // Packets sent to destination=CPX_T_STM32 and function=CPX_F_APP will arrive here
   cpxRegisterAppMessageHandler(cpxPacketCallback);
